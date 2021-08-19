@@ -21,25 +21,77 @@ class FormMain extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    // Current year.
+    $year = date('Y');
+    // Number of rows.
+    $number_of_tags = $form_state->get('number_of_tags');
+    $zz             = 0;
 
-    $form['table']   = [
+    for ($i = 1; $i <= 4; $i++) {
+      $zz++;
+    }
+
+    $form['table'] = [
       '#type'   => 'table',
-      '#header' => ['Year', 'Month'],
+      '#header' => [
+        'Year',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Q1',
+        'Apr',
+        'May',
+        'Jun',
+        'Q2',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Q3',
+        'Oct',
+        'Nov',
+        'Dec',
+        'Q4',
+        'YTD',
+      ],
     ];
 
-    $form['message'] = [
-      '#type'     => 'textarea',
-      '#title'    => $this->t('Message'),
-      '#required' => TRUE,
-    ];
+    for ($i = 1; $i <= $number_of_tags - 1; $i++) {
+      $form['table'][$i]['year'] = [
+        '#type'  => 'number',
+        '#value' => $year - $i,
+      ];
+      $form['table'][$i]['jan']  = [
+        '#type' => 'number',
+      ];
+      $form['table'][$i]['feb']  = [
+        '#type' => 'number',
+      ];
+    }
 
-    $form['actions']           = [
-      '#type' => 'actions',
+    // Add a row button.
+    $form['addRow'] = [
+      '#type'   => 'submit',
+      '#value'  => t('+ Row'),
+      '#submit' => ['::addOneTag'],
     ];
+    // Add form button.
+    $form['addForm'] = [
+      '#type'       => 'submit',
+      '#value'      => t('+ Form'),
+      '#submit'     => ['::addOneTag'],
+      '#attributes' => ["onclick" => "javascript: this.disabled = true;"],
+    ];
+    // Add a submit button that handles the submission of the form.
     $form['actions']['submit'] = [
-      '#type'  => 'submit',
-      '#value' => $this->t('Send'),
+      '#type'       => 'submit',
+      '#value'      => $this->t('Send'),
+      '#attributes' => ["onclick" => "javascript: this.disabled = true;"],
     ];
+
+    if (empty($number_of_tags)) {
+      $number_of_tags = 1;
+      $form_state->set('number_of_tags', $number_of_tags);
+    }
 
     return $form;
   }
@@ -48,9 +100,16 @@ class FormMain extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    if (mb_strlen($form_state->getValue('message')) < 10) {
-      $form_state->setErrorByName('name', $this->t('Message should be at least 10 characters.'));
-    }
+    // Do validation.
+  }
+
+  /**
+   * Increment number of rows.
+   */
+  public function addOneTag(array &$form, FormStateInterface $form_state) {
+    $number_of_tags = $form_state->get('number_of_tags');
+    $form_state->set('number_of_tags', $number_of_tags + 1);
+    $form_state->setRebuild(TRUE);
   }
 
   /**
@@ -58,7 +117,7 @@ class FormMain extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->messenger()->addStatus($this->t('The message has been sent.'));
-    $form_state->setRedirect('<front>');
+    $form_state->setRedirect('romaroma.form_main');
   }
 
 }
