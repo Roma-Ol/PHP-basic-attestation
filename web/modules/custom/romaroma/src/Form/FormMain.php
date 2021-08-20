@@ -27,7 +27,9 @@ class FormMain extends FormBase {
     $number_of_forms = $form_state->get('number_of_forms');
     $number_of_tags  = $form_state->get('number_of_tags');
 
-    for ($y = 0; $y < $number_of_forms + 1; $y++) {
+    $number_of_lines = $form_state->get('number_of_lines');
+
+    for ($y = 0; $y < $number_of_forms; $y++) {
       $form['table'][$y] = [
         '#type'   => 'table',
         '#header' => [
@@ -52,7 +54,7 @@ class FormMain extends FormBase {
         ],
       ];
 
-      for ($i = 0; $i < $number_of_tags - 1; $i++) {
+      for ($i = 0; $i < $number_of_lines; $i++) {
         $form['table'][$y][$i]['year'] = [
           '#type'     => 'number',
           '#value'    => $year - $i,
@@ -85,9 +87,9 @@ class FormMain extends FormBase {
       '#attributes' => ["onclick" => "javascript: this.disabled = true;"],
     ];
 
-    if (empty($number_of_tags)) {
-      $number_of_tags = 1;
-      $form_state->set('number_of_tags', $number_of_tags);
+    if (empty($number_of_lines)) {
+      $number_of_lines = 1;
+      $form_state->set('number_of_lines', $number_of_lines);
     }
 
     if (empty($number_of_forms)) {
@@ -109,8 +111,8 @@ class FormMain extends FormBase {
    * Increment number of rows.
    */
   public function addOneTag(array &$form, FormStateInterface $form_state) {
-    $number_of_tags = $form_state->get('number_of_tags');
-    $form_state->set('number_of_tags', $number_of_tags + 1);
+    $number_of_lines = $form_state->get('number_of_lines');
+    $form_state->set('number_of_lines', $number_of_lines + 1);
     $form_state->setRebuild(TRUE);
   }
 
