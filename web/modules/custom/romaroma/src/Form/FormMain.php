@@ -25,7 +25,7 @@ class FormMain extends FormBase {
     $year = date('Y');
     // Counters for forms and lines.
     $number_of_forms = $form_state->get('number_of_forms');
-    $number_of_lines = $form_state->get('number_of_lines');
+    $number_of_rows = $form_state->get('number_of_rows');
 
     for ($tables = 0; $tables < $number_of_forms; $tables++) {
       $form['table'][$tables] = [
@@ -52,7 +52,7 @@ class FormMain extends FormBase {
         ],
       ];
 
-      for ($rows = 0; $rows < $number_of_lines; $rows++) {
+      for ($rows = 0; $rows < $number_of_rows; $rows++) {
         $form['table'][$tables][$rows]['year'] = [
           '#type'     => 'number',
           '#value'    => $year - $rows,
@@ -85,9 +85,9 @@ class FormMain extends FormBase {
       '#attributes' => ["onclick" => "javascript: this.disabled = true;"],
     ];
 
-    if (empty($number_of_lines)) {
-      $number_of_lines = 1;
-      $form_state->set('number_of_lines', $number_of_lines);
+    if (empty($number_of_rows)) {
+      $number_of_rows = 1;
+      $form_state->set('number_of_rows', $number_of_rows);
     }
 
     if (empty($number_of_forms)) {
@@ -109,8 +109,8 @@ class FormMain extends FormBase {
    * Increment number of rows.
    */
   public function addOneRow(array &$form, FormStateInterface $form_state) {
-    $number_of_lines = $form_state->get('number_of_lines');
-    $form_state->set('number_of_lines', $number_of_lines + 1);
+    $number_of_rows = $form_state->get('number_of_rows');
+    $form_state->set('number_of_rows', $number_of_rows + 1);
     $form_state->setRebuild(TRUE);
   }
 
