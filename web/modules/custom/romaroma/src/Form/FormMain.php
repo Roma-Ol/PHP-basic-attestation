@@ -24,48 +24,46 @@ class FormMain extends FormBase {
     // Current year.
     $year = date('Y');
     // Number of rows.
-    $number_of_tags = $form_state->get('number_of_tags');
-    $zz             = 0;
+    $number_of_forms = $form_state->get('number_of_forms');
+    $number_of_tags  = $form_state->get('number_of_tags');
 
-    for ($i = 1; $i <= 4; $i++) {
-      $zz++;
-    }
+    for ($y = 0; $y < $number_of_forms + 1; $y++) {
+      $form['table'][$y] = [
+        '#type'   => 'table',
+        '#header' => [
+          'Year',
+          'Jan',
+          'Feb',
+          'Mar',
+          'Q1',
+          'Apr',
+          'May',
+          'Jun',
+          'Q2',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Q3',
+          'Oct',
+          'Nov',
+          'Dec',
+          'Q4',
+          'YTD',
+        ],
+      ];
 
-    $form['table'] = [
-      '#type'   => 'table',
-      '#header' => [
-        'Year',
-        'Jan',
-        'Feb',
-        'Mar',
-        'Q1',
-        'Apr',
-        'May',
-        'Jun',
-        'Q2',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Q3',
-        'Oct',
-        'Nov',
-        'Dec',
-        'Q4',
-        'YTD',
-      ],
-    ];
-
-    for ($i = 1; $i <= $number_of_tags - 1; $i++) {
-      $form['table'][$i]['year'] = [
-        '#type'  => 'number',
-        '#value' => $year - $i,
-      ];
-      $form['table'][$i]['jan']  = [
-        '#type' => 'number',
-      ];
-      $form['table'][$i]['feb']  = [
-        '#type' => 'number',
-      ];
+      for ($i = 0; $i < $number_of_tags - 1; $i++) {
+        $form['table'][$y][$i]['year'] = [
+          '#type'     => 'number',
+          '#value'    => $year - $i,
+          '#disabled' => TRUE,
+        ];
+        for ($c = 1; $c <= 17; $c++) {
+          $form['table'][$y][$i][$c] = [
+            '#type' => 'number',
+          ];
+        }
+      }
     }
 
     // Add a row button.
@@ -76,10 +74,9 @@ class FormMain extends FormBase {
     ];
     // Add form button.
     $form['addForm'] = [
-      '#type'       => 'submit',
-      '#value'      => t('+ Form'),
-      '#submit'     => ['::addOneTag'],
-      '#attributes' => ["onclick" => "javascript: this.disabled = true;"],
+      '#type'   => 'submit',
+      '#value'  => t('+ Form'),
+      '#submit' => ['::addOneForm'],
     ];
     // Add a submit button that handles the submission of the form.
     $form['actions']['submit'] = [
@@ -91,6 +88,11 @@ class FormMain extends FormBase {
     if (empty($number_of_tags)) {
       $number_of_tags = 1;
       $form_state->set('number_of_tags', $number_of_tags);
+    }
+
+    if (empty($number_of_forms)) {
+      $number_of_forms = 1;
+      $form_state->set('$number_of_forms', $number_of_forms);
     }
 
     return $form;
@@ -109,6 +111,15 @@ class FormMain extends FormBase {
   public function addOneTag(array &$form, FormStateInterface $form_state) {
     $number_of_tags = $form_state->get('number_of_tags');
     $form_state->set('number_of_tags', $number_of_tags + 1);
+    $form_state->setRebuild(TRUE);
+  }
+
+  /**
+   * Increment number of tables.
+   */
+  public function addOneForm(array &$form, FormStateInterface $form_state) {
+    $number_of_forms = $form_state->get('number_of_forms');
+    $form_state->set('number_of_forms', $number_of_forms + 1);
     $form_state->setRebuild(TRUE);
   }
 
