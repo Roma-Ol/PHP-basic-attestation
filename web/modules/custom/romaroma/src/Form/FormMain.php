@@ -23,14 +23,12 @@ class FormMain extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Current year.
     $year = date('Y');
-    // Number of rows.
+    // Counters for forms and lines.
     $number_of_forms = $form_state->get('number_of_forms');
-    $number_of_tags  = $form_state->get('number_of_tags');
-
     $number_of_lines = $form_state->get('number_of_lines');
 
-    for ($y = 0; $y < $number_of_forms; $y++) {
-      $form['table'][$y] = [
+    for ($tables = 0; $tables < $number_of_forms; $tables++) {
+      $form['table'][$tables] = [
         '#type'   => 'table',
         '#header' => [
           'Year',
@@ -54,14 +52,14 @@ class FormMain extends FormBase {
         ],
       ];
 
-      for ($i = 0; $i < $number_of_lines; $i++) {
-        $form['table'][$y][$i]['year'] = [
+      for ($rows = 0; $rows < $number_of_lines; $rows++) {
+        $form['table'][$tables][$rows]['year'] = [
           '#type'     => 'number',
-          '#value'    => $year - $i,
+          '#value'    => $year - $rows,
           '#disabled' => TRUE,
         ];
-        for ($c = 1; $c <= 17; $c++) {
-          $form['table'][$y][$i][$c] = [
+        for ($cells = 1; $cells <= 17; $cells++) {
+          $form['table'][$tables][$rows][$cells] = [
             '#type' => 'number',
           ];
         }
@@ -72,7 +70,7 @@ class FormMain extends FormBase {
     $form['addRow'] = [
       '#type'   => 'submit',
       '#value'  => t('+ Row'),
-      '#submit' => ['::addOneTag'],
+      '#submit' => ['::addOneRow'],
     ];
     // Add form button.
     $form['addForm'] = [
@@ -110,7 +108,7 @@ class FormMain extends FormBase {
   /**
    * Increment number of rows.
    */
-  public function addOneTag(array &$form, FormStateInterface $form_state) {
+  public function addOneRow(array &$form, FormStateInterface $form_state) {
     $number_of_lines = $form_state->get('number_of_lines');
     $form_state->set('number_of_lines', $number_of_lines + 1);
     $form_state->setRebuild(TRUE);
