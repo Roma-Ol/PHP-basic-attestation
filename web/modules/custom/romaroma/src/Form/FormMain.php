@@ -25,7 +25,7 @@ class FormMain extends FormBase {
     $year = date('Y');
     // Counters for forms and lines.
     $number_of_forms = $form_state->get('number_of_forms');
-    $number_of_rows = $form_state->get('number_of_rows');
+    $number_of_rows  = $form_state->get('number_of_rows');
 
     for ($tables = 0; $tables < $number_of_forms; $tables++) {
       $form['table'][$tables] = [
@@ -50,6 +50,8 @@ class FormMain extends FormBase {
           'Q4',
           'YTD',
         ],
+        '#prefix' => '<div id="veritas-id-wrapper">',
+        '#suffix' => '</div>',
       ];
 
       for ($rows = 0; $rows < $number_of_rows; $rows++) {
@@ -71,12 +73,17 @@ class FormMain extends FormBase {
       '#type'   => 'submit',
       '#value'  => t('+ Row'),
       '#submit' => ['::addOneRow'],
+      '#attributes' => ['class' => ['btn-transparent']],
+      '#ajax'       => [
+        'callback' => '::addmoreCallbackVeritas',
+        'wrapper'  => 'veritas-id-wrapper',
+      ],
     ];
     // Add form button.
     $form['addForm'] = [
-      '#type'   => 'submit',
-      '#value'  => t('+ Form'),
-      '#submit' => ['::addOneForm'],
+      '#type'       => 'submit',
+      '#value'      => t('+ Form'),
+      '#submit'     => ['::addOneForm'],
     ];
     // Add a submit button that handles the submission of the form.
     $form['actions']['submit'] = [
@@ -103,6 +110,14 @@ class FormMain extends FormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     // Do validation.
+  }
+
+  /**
+   * AJAX adding a field.
+   */
+  public function addmoreCallbackVeritas(array &$form, FormStateInterface $form_state) {
+    $form = $form_state->getCompleteForm();
+    return $form['table'];
   }
 
   /**
