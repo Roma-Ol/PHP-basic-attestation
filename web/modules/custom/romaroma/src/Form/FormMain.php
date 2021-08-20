@@ -26,8 +26,11 @@ class FormMain extends FormBase {
     // Counters for forms and lines.
     $number_of_forms = $form_state->get('number_of_forms');
     $number_of_rows  = $form_state->get('number_of_rows');
+    $form_state->setCached(FALSE);
 
     for ($tables = 0; $tables < $number_of_forms; $tables++) {
+      $form['#tree'] = TRUE;
+      $form_state->setCached(FALSE);
       $form['table'][$tables] = [
         '#type'   => 'table',
         '#header' => [
@@ -75,7 +78,7 @@ class FormMain extends FormBase {
       '#submit' => ['::addOneRow'],
       '#attributes' => ['class' => ['btn-transparent']],
       '#ajax'       => [
-        'callback' => '::addmoreCallbackVeritas',
+        'callback' => '::addRowAJAX',
         'wrapper'  => 'veritas-id-wrapper',
       ],
     ];
@@ -84,6 +87,10 @@ class FormMain extends FormBase {
       '#type'       => 'submit',
       '#value'      => t('+ Form'),
       '#submit'     => ['::addOneForm'],
+      '#ajax'       => [
+        'callback' => '::addFormAJAX',
+        'wrapper'  => 'veritas-id-wrapper',
+      ],
     ];
     // Add a submit button that handles the submission of the form.
     $form['actions']['submit'] = [
@@ -115,8 +122,15 @@ class FormMain extends FormBase {
   /**
    * AJAX adding a field.
    */
-  public function addmoreCallbackVeritas(array &$form, FormStateInterface $form_state) {
+  public function addRowAJAX(array &$form, FormStateInterface $form_state) {
     $form = $form_state->getCompleteForm();
+    $form_state->setCached(FALSE);
+    return $form['table'];
+  }
+
+  public function addFormAJAX(array &$form, FormStateInterface $form_state) {
+    $form = $form_state->getCompleteForm();
+    $form_state->setCached(FALSE);
     return $form['table'];
   }
 
@@ -127,6 +141,7 @@ class FormMain extends FormBase {
     $number_of_rows = $form_state->get('number_of_rows');
     $form_state->set('number_of_rows', $number_of_rows + 1);
     $form_state->setRebuild(TRUE);
+    $form_state->setCached(FALSE);
   }
 
   /**
