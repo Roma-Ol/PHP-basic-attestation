@@ -31,8 +31,8 @@ class FormMain extends FormBase {
       $number_of_forms = 1;
     }
     if ($number_of_rows === NULL) {
-      $number_of_rows = $form_state->set('number_of_rows', 0);
-      $number_of_rows = 0;
+      $number_of_rows = $form_state->set('number_of_rows', 1);
+      $number_of_rows = 1;
     }
 
     // Building a form.
@@ -67,22 +67,74 @@ class FormMain extends FormBase {
           'Q4',
           'YTD',
         ],
-        '#prefix' => '<div id="veritas-id-wrapper">',
-        '#suffix' => '</div>',
       ];
-      // Rows generator.
+      // Super- dummy rows generator.
       for ($rows = 0; $rows < $number_of_rows; $rows++) {
         $form['table'][$tables][$rows]['year'] = [
           '#type'     => 'number',
           '#value'    => $year - $rows,
           '#disabled' => TRUE,
         ];
-        // Cells generator.
-        for ($cells = 1; $cells <= 17; $cells++) {
-          $form['table'][$tables][$rows][$cells] = [
-            '#type' => 'number',
-          ];
-        }
+        $form['table'][$tables][$rows]['jan']  = [
+          '#type' => 'number',
+        ];
+        $form['table'][$tables][$rows]['feb']  = [
+          '#type' => 'number',
+        ];
+        $form['table'][$tables][$rows]['mar']  = [
+          '#type' => 'number',
+        ];
+        $form['table'][$tables][$rows]['q1']   = [
+          '#type'     => 'number',
+          '#value'    => '777',
+          '#disabled' => TRUE,
+        ];
+        $form['table'][$tables][$rows]['apr']  = [
+          '#type' => 'number',
+        ];
+        $form['table'][$tables][$rows]['may']  = [
+          '#type' => 'number',
+        ];
+        $form['table'][$tables][$rows]['jun']  = [
+          '#type' => 'number',
+        ];
+        $form['table'][$tables][$rows]['q2']   = [
+          '#type'     => 'number',
+          '#value'    => '777',
+          '#disabled' => TRUE,
+        ];
+        $form['table'][$tables][$rows]['jul']  = [
+          '#type' => 'number',
+        ];
+        $form['table'][$tables][$rows]['aug']  = [
+          '#type' => 'number',
+        ];
+        $form['table'][$tables][$rows]['sep']  = [
+          '#type' => 'number',
+        ];
+        $form['table'][$tables][$rows]['q3']   = [
+          '#type'     => 'number',
+          '#value'    => '777',
+          '#disabled' => TRUE,
+        ];
+        $form['table'][$tables][$rows]['oct']  = [
+          '#type' => 'number',
+        ];
+        $form['table'][$tables][$rows]['nov']  = [
+          '#type' => 'number',
+        ];
+        $form['table'][$tables][$rows]['dec']  = [
+          '#type' => 'number',
+        ];
+        $form['table'][$tables][$rows]['q4']   = [
+          '#type'     => 'number',
+          '#value'    => '777',
+          '#disabled' => TRUE,
+        ];
+        $form['table'][$tables][$rows]['ytd']  = [
+          '#type'     => 'number',
+          '#disabled' => TRUE,
+        ];
       }
     }
 
@@ -123,7 +175,42 @@ class FormMain extends FormBase {
    * Basic form validation.
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // Do validation.
+    // Getting the number of tables and rows.
+    $tables = $form_state->get('number_of_forms');
+    $rows   = $form_state->get('number_of_rows');
+    // Repeating the validation 4 every table.
+    for ($table_count = 0; $table_count < $tables; $table_count++) {
+      // Repeating the validation 4 every row.
+      for ($rows_count = 0; $rows_count < $rows; $rows_count++) {
+        $value    = $form_state->getValues();
+        $valueJan = $value['table'][$table_count][$rows_count]['jan'];
+        $valueFeb = $value['table'][$table_count][$rows_count]['feb'];
+        $valueMar = $value['table'][$table_count][$rows_count]['mar'];
+        $valueApr = $value['table'][$table_count][$rows_count]['apr'];
+        $valueMay = $value['table'][$table_count][$rows_count]['may'];
+        $valueJun = $value['table'][$table_count][$rows_count]['jun'];
+        $valueJul = $value['table'][$table_count][$rows_count]['jul'];
+        $valueAug = $value['table'][$table_count][$rows_count]['aug'];
+        $valueSep = $value['table'][$table_count][$rows_count]['sep'];
+        $valueOct = $value['table'][$table_count][$rows_count]['oct'];
+        $valueNov = $value['table'][$table_count][$rows_count]['nov'];
+        $valueDec = $value['table'][$table_count][$rows_count]['dec'];
+        $status1  = 1;
+        $status2  = 2;
+        $status3  = 3;
+
+        if ($rows === 1) {
+          // One-str validation.
+          if (!empty($valueJan) && !empty($valueFeb) && !empty($valueMar)) {
+            $status1 = 3;
+          }
+        }
+        else {
+          // Multi-str validation..
+        }
+
+      }
+    }
   }
 
   /**
