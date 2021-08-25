@@ -21,6 +21,7 @@ class FormMain extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    \Drupal::service('page_cache_kill_switch')->trigger();
     // Current year.
     $year = date('Y');
     // Counters for forms and lines.
@@ -28,9 +29,18 @@ class FormMain extends FormBase {
     $number_of_rows  = $form_state->get('number_of_rows');
     $form_state->setCached(FALSE);
 
+    if ($number_of_forms === NULL) {
+      $number_of_forms = $form_state->set('number_of_forms', 1);
+      $number_of_forms = 1;
+    }
+
+    if ($number_of_rows === NULL) {
+      $number_of_rows = $form_state->set('number_of_rows', 1);
+      $number_of_rows = 1;
+    }
+
     for ($tables = 0; $tables < $number_of_forms; $tables++) {
-      $form['#tree'] = TRUE;
-      $form_state->setCached(FALSE);
+      $form['#tree']          = TRUE;
       $form['table'][$tables] = [
         '#type'   => 'table',
         '#header' => [
@@ -72,42 +82,31 @@ class FormMain extends FormBase {
     }
 
     // Add a row button.
-    $form['addRow'] = [
-      '#type'   => 'submit',
-      '#value'  => t('+ Row'),
-      '#submit' => ['::addOneRow'],
+    $form['actions']['add_row'] = [
+      '#type'       => 'submit',
+      '#value'      => t('+ Row'),
+      '#submit'     => ['::addOneRow'],
       '#attributes' => ['class' => ['btn-transparent']],
-//      '#ajax'       => [
-//        'callback' => '::addRowAJAX',
-//        'wrapper'  => 'veritas-id-wrapper',
-//      ],
+      '#ajax'       => [
+        'callback' => '::addRowAJAX',
+        'wrapper'  => 'veritas-id-wrapper',
+      ],
     ];
     // Add form button.
-    $form['addForm'] = [
-      '#type'       => 'submit',
-      '#value'      => t('+ Form'),
-      '#submit'     => ['::addOneForm'],
-//      '#ajax'       => [
-//        'callback' => '::addFormAJAX',
-//        'wrapper'  => 'veritas-id-wrapper',
-//      ],
+    $form['actions']['add_form'] = [
+      '#type'   => 'submit',
+      '#value'  => t('+ Form'),
+      '#submit' => ['::addOneForm'],
+      '#ajax'   => [
+        'callback' => '::addFormAJAX',
+        'wrapper'  => 'veritas-id-wrapper',
+      ],
     ];
     // Add a submit button that handles the submission of the form.
     $form['actions']['submit'] = [
-      '#type'       => 'submit',
-      '#value'      => $this->t('Send'),
-      '#attributes' => ["onclick" => "javascript: this.disabled = true;"],
+      '#type'  => 'submit',
+      '#value' => $this->t('Send'),
     ];
-
-    if (empty($number_of_rows)) {
-      $number_of_rows = 1;
-      $form_state->set('number_of_rows', $number_of_rows);
-    }
-
-    if (empty($number_of_forms)) {
-      $number_of_forms = 1;
-      $form_state->set('$number_of_forms', $number_of_forms);
-    }
 
     return $form;
   }
@@ -124,17 +123,11 @@ class FormMain extends FormBase {
    */
   public function addRowAJAX(array &$form, FormStateInterface $form_state) {
     $form = $form_state->getCompleteForm();
-    $form_state->setCached(FALSE);
-    $number_of_rows = $form_state->get('number_of_rows');
-    $form_state->set('number_of_rows', $number_of_rows + 1);
-    $form_state->setRebuild(TRUE);
-    $form_state->setCached(FALSE);
     return $form['table'];
   }
 
   public function addFormAJAX(array &$form, FormStateInterface $form_state) {
     $form = $form_state->getCompleteForm();
-    $form_state->setCached(FALSE);
     return $form['table'];
   }
 
@@ -143,9 +136,9 @@ class FormMain extends FormBase {
    */
   public function addOneRow(array &$form, FormStateInterface $form_state) {
     $number_of_rows = $form_state->get('number_of_rows');
-    $form_state->set('number_of_rows', $number_of_rows + 1);
-    $form_state->setRebuild(TRUE);
-    $form_state->setCached(FALSE);
+    $add_button1 = $number_of_rows +1;
+    $form_state->set('number_of_rows', $add_button1);
+    $form_state->setRebuild();
   }
 
   /**
@@ -153,8 +146,9 @@ class FormMain extends FormBase {
    */
   public function addOneForm(array &$form, FormStateInterface $form_state) {
     $number_of_forms = $form_state->get('number_of_forms');
-    $form_state->set('number_of_forms', $number_of_forms + 1);
-    $form_state->setRebuild(TRUE);
+    $add_button2 = $number_of_forms +1;
+    $form_state->set('number_of_forms', $add_button2);
+    $form_state->setRebuild();
   }
 
   /**
