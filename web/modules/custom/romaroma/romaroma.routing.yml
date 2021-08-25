@@ -5,5 +5,3 @@ romaroma.form_main:
     _form: 'Drupal\romaroma\Form\FormMain'
   requirements:
     _permission: 'access content'
-  options:
-    no_cache: 'TRUE'

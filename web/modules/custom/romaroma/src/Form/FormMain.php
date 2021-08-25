@@ -21,13 +21,11 @@ class FormMain extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    \Drupal::service('page_cache_kill_switch')->trigger();
     // Current year.
     $year = date('Y');
     // Counters for forms and lines.
     $number_of_forms = $form_state->get('number_of_forms');
     $number_of_rows  = $form_state->get('number_of_rows');
-    $form_state->setCached(FALSE);
 
     if ($number_of_forms === NULL) {
       $number_of_forms = $form_state->set('number_of_forms', 1);
@@ -38,6 +36,12 @@ class FormMain extends FormBase {
       $number_of_rows = $form_state->set('number_of_rows', 1);
       $number_of_rows = 1;
     }
+
+    $form['table'] = [
+      '#type' => 'fieldset',
+      '#prefix' => '<div id="veritas-id-wrapper">',
+      '#suffix' => '</div>',
+    ];
 
     for ($tables = 0; $tables < $number_of_forms; $tables++) {
       $form['#tree']          = TRUE;
