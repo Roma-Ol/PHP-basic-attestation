@@ -86,7 +86,6 @@ class FormMain extends FormBase {
         ];
         $form['table'][$tables][$rows]['q1']   = [
           '#type'     => 'number',
-          '#value'    => '777',
           '#disabled' => TRUE,
         ];
         $form['table'][$tables][$rows]['apr']  = [
@@ -169,6 +168,10 @@ class FormMain extends FormBase {
     return $form;
   }
 
+  public function addQuaterOne(array &$form, FormStateInterface $form_state) {
+    // Do smt.
+  }
+
   /**
    * {@inheritdoc}
    *
@@ -199,14 +202,16 @@ class FormMain extends FormBase {
         $status2  = 2;
         $status3  = 3;
 
-        if ($rows === 1) {
-          // One-str validation.
+        // Validation for 2 and more tables.
+        if ($tables === 1) {
           if (!empty($valueJan) && !empty($valueFeb) && !empty($valueMar)) {
+            // One-table validation.
+
             $status1 = 3;
           }
         }
         else {
-          // Multi-str validation..
+          // Multi-table validation..
         }
 
       }
