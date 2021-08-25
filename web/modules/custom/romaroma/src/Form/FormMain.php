@@ -77,20 +77,20 @@ class FormMain extends FormBase {
       '#value'  => t('+ Row'),
       '#submit' => ['::addOneRow'],
       '#attributes' => ['class' => ['btn-transparent']],
-      '#ajax'       => [
-        'callback' => '::addRowAJAX',
-        'wrapper'  => 'veritas-id-wrapper',
-      ],
+//      '#ajax'       => [
+//        'callback' => '::addRowAJAX',
+//        'wrapper'  => 'veritas-id-wrapper',
+//      ],
     ];
     // Add form button.
     $form['addForm'] = [
       '#type'       => 'submit',
       '#value'      => t('+ Form'),
       '#submit'     => ['::addOneForm'],
-      '#ajax'       => [
-        'callback' => '::addFormAJAX',
-        'wrapper'  => 'veritas-id-wrapper',
-      ],
+//      '#ajax'       => [
+//        'callback' => '::addFormAJAX',
+//        'wrapper'  => 'veritas-id-wrapper',
+//      ],
     ];
     // Add a submit button that handles the submission of the form.
     $form['actions']['submit'] = [
@@ -124,6 +124,10 @@ class FormMain extends FormBase {
    */
   public function addRowAJAX(array &$form, FormStateInterface $form_state) {
     $form = $form_state->getCompleteForm();
+    $form_state->setCached(FALSE);
+    $number_of_rows = $form_state->get('number_of_rows');
+    $form_state->set('number_of_rows', $number_of_rows + 1);
+    $form_state->setRebuild(TRUE);
     $form_state->setCached(FALSE);
     return $form['table'];
   }
