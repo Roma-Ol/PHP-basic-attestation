@@ -70,6 +70,16 @@ class FormMain extends FormBase {
       ];
       // Super- dummy rows generator.
       for ($rows = 0; $rows < $number_of_rows; $rows++) {
+        //        $input = $form_state->getUserInput();
+        //        $trigered_element = $form_state->getTriggeringElement();
+        //        $trigered_button = $trigered_element['#value'];
+        //        if ($trigered_button == 'Send') {
+        //          $counted    = $this->countData($form, $form_state);
+        //          $quaterData = $counted['table'][$tables][$rows];
+        //        }
+        //        else {
+        //          $rr = 1;
+        //        }
         $form['table'][$tables][$rows]['year'] = [
           '#type'     => 'number',
           '#value'    => $year - $rows,
@@ -86,6 +96,7 @@ class FormMain extends FormBase {
         ];
         $form['table'][$tables][$rows]['q1']   = [
           '#type'     => 'number',
+          '#value'    => '777',
           '#disabled' => TRUE,
         ];
         $form['table'][$tables][$rows]['apr']  = [
@@ -172,6 +183,16 @@ class FormMain extends FormBase {
     // Do smt.
   }
 
+  function firstValueFilled($array) {
+    foreach ($array as $firstNeedle) {
+      if ($firstNeedle) {
+        $needleKey = array_search($firstNeedle, $array);
+        return $needleKey;
+      }
+    }
+    return NULL;
+  }
+
   /**
    * {@inheritdoc}
    *
@@ -181,39 +202,53 @@ class FormMain extends FormBase {
     // Getting the number of tables and rows.
     $tables = $form_state->get('number_of_forms');
     $rows   = $form_state->get('number_of_rows');
+    $keys   = [
+      'jan',
+      'feb',
+      'mar',
+      'apr',
+      'may',
+      'jun',
+      'jul',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+    ];
     // Repeating the validation 4 every table.
+    $value = $form_state->getUserInput()['table'];
     for ($table_count = 0; $table_count < $tables; $table_count++) {
+
       // Repeating the validation 4 every row.
       for ($rows_count = 0; $rows_count < $rows; $rows_count++) {
-        $value    = $form_state->getValues();
-        $valueJan = $value['table'][$table_count][$rows_count]['jan'];
-        $valueFeb = $value['table'][$table_count][$rows_count]['feb'];
-        $valueMar = $value['table'][$table_count][$rows_count]['mar'];
-        $valueApr = $value['table'][$table_count][$rows_count]['apr'];
-        $valueMay = $value['table'][$table_count][$rows_count]['may'];
-        $valueJun = $value['table'][$table_count][$rows_count]['jun'];
-        $valueJul = $value['table'][$table_count][$rows_count]['jul'];
-        $valueAug = $value['table'][$table_count][$rows_count]['aug'];
-        $valueSep = $value['table'][$table_count][$rows_count]['sep'];
-        $valueOct = $value['table'][$table_count][$rows_count]['oct'];
-        $valueNov = $value['table'][$table_count][$rows_count]['nov'];
-        $valueDec = $value['table'][$table_count][$rows_count]['dec'];
-        $status1  = 1;
-        $status2  = 2;
-        $status3  = 3;
+        // Validating the row integrity .
+        // Logic: take 1st, take last, check what`s between them.
+        $testValue = $value[$table_count][$rows_count];
+        $first     = $this->firstValueFilled($testValue);
 
-        // Validation for 2 and more tables.
-        if ($tables === 1) {
-          if (!empty($valueJan) && !empty($valueFeb) && !empty($valueMar)) {
-            // One-table validation.
+        // Repeating the validation 4 every cell.
+        for ($cell_count = 0; $cell_count < count($keys); $cell_count++) {
+          $headerKey              = $keys[$cell_count];
+          $firstRowCellToCompare  = $value[0][$rows_count][$headerKey];
+          $secondRowCellToCompare = $value[$table_count][$rows_count][$headerKey];
+          $rowFirstCellFilled     = '';
+          $rowLastCellFilled      = '';
 
-            $status1 = 3;
+          // One-line multi-table validation.
+          if ($tables != 1) {
+            if ($firstRowCellToCompare == '' && $secondRowCellToCompare == '') {
+              $correct = TRUE;
+            }
+            elseif ($firstRowCellToCompare != '' && $secondRowCellToCompare != '') {
+              $correct = TRUE;
+            }
+            else {
+              $form_state->setErrorByName('Tables validation', $this->t(
+                'Invalid'));
+            }
           }
         }
-        else {
-          // Multi-table validation..
-        }
-
       }
     }
   }
