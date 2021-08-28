@@ -70,16 +70,6 @@ class FormMain extends FormBase {
       ];
       // Super- dummy rows generator.
       for ($rows = 0; $rows < $number_of_rows; $rows++) {
-        //        $input = $form_state->getUserInput();
-        //        $trigered_element = $form_state->getTriggeringElement();
-        //        $trigered_button = $trigered_element['#value'];
-        //        if ($trigered_button == 'Send') {
-        //          $counted    = $this->countData($form, $form_state);
-        //          $quaterData = $counted['table'][$tables][$rows];
-        //        }
-        //        else {
-        //          $rr = 1;
-        //        }
         $form['table'][$tables][$rows]['year'] = [
           '#type'     => 'number',
           '#value'    => $year - $rows,
@@ -172,15 +162,12 @@ class FormMain extends FormBase {
     ];
     // 'Submit' button.
     $form['actions']['submit'] = [
+      '#name'  => 'Send',
       '#type'  => 'submit',
       '#value' => $this->t('Send'),
     ];
 
     return $form;
-  }
-
-  public function addQuaterOne(array &$form, FormStateInterface $form_state) {
-    // Do smt.
   }
 
   /**
@@ -209,76 +196,66 @@ class FormMain extends FormBase {
   }
 
   /**
-   * Filter the array according to the integrity.
-   * (Remove all the empty values from the new arr.
-   */
-  function filterTheArray($filtered) {
-    return $filtered !== '';
-
-  }
-
-  /**
    * {@inheritdoc}
    *
    * Basic form validation.
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // Getting the number of tables and rows.
-    $tables = $form_state->get('number_of_forms');
-    $rows   = $form_state->get('number_of_rows');
-    $keys   = [
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      '10',
-      '11',
-      '12',
-    ];
-    // Repeating the validation 4 every table.
-    $value = $form_state->getUserInput()['table'];
-    for ($table_count = 0; $table_count < $tables; $table_count++) {
+    // Ensuring that the triggering element is real submit button.
+    $triggeredElement = $form_state->getTriggeringElement()['#name'];
+    if ($triggeredElement === 'Send') {
+      // Getting the number of tables and rows.
+      $tables = $form_state->get('number_of_forms');
+      $rows   = $form_state->get('number_of_rows');
+      $keys   = [
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        '11',
+        '12',
+      ];
+      // Repeating the validation 4 every table.
+      $value = $form_state->getUserInput()['table'];
+      for ($table_count = 0; $table_count < $tables; $table_count++) {
 
-      // Repeating the validation 4 every row.
-      for ($rows_count = 0; $rows_count < $rows; $rows_count++) {
-        // Validating the row integrity .
-        // Logic: take 1st, take last, check what`s between them - get the length.
-        // Logic: Delete all the empty cells, compare length of 2 arr.
-        $arrayToFilter    = $value[$table_count][$rows_count];
-        $first            = $this->firstValueFilled($arrayToFilter);
-        $last             = $this->lastValueFilled($arrayToFilter) + 1;
-        $fullArrLength    = 12 - $last - $first + 2;
-        $preFilteredArray = array_slice($arrayToFilter, $first - 1, $fullArrLength);
-        $filteredArray    = array_filter($preFilteredArray, function ($filtered) {
-          return $filtered !== '';
-        });
-        if (count($preFilteredArray) !== count($filteredArray)) {
-          return $form_state->setErrorByName('Tables validation', $this->t(
-            'Invalid'));
-        }
+        // Repeating the validation 4 every row.
+        for ($rows_count = 0; $rows_count < $rows; $rows_count++) {
+          // Validating the row integrity .
+          // Logic: take 1st,take last,check what`s between them-get the length.
+          // Logic: Delete all the empty cells, compare length of 2 arr.
+          $arrayToFilter    = $value[$table_count][$rows_count];
+          $first            = $this->firstValueFilled($arrayToFilter);
+          $last             = $this->lastValueFilled($arrayToFilter) + 1;
+          $fullArrLength    = 12 - $last - $first + 2;
+          $preFilteredArray = array_slice($arrayToFilter, $first - 1, $fullArrLength);
+          $filteredArray    = array_filter($preFilteredArray, function ($filtered) {
+            return $filtered !== '';
+          });
+          if (count($preFilteredArray) !== count($filteredArray)) {
+            return $form_state->setErrorByName('Tables validation', $this->t(
+              'Invalid'));
+          }
 
-        // Repeating the validation 4 every cell.
-        for ($cell_count = 0; $cell_count < count($keys); $cell_count++) {
-          $headerKey              = $keys[$cell_count];
-          $firstRowCellToCompare  = $value[0][$rows_count][$headerKey];
-          $secondRowCellToCompare = $value[$table_count][$rows_count][$headerKey];
+          // Repeating the validation 4 every cell.
+          for ($cell_count = 0; $cell_count < count($keys); $cell_count++) {
+            $headerKey              = $keys[$cell_count];
+            $firstRowCellToCompare  = $value[0][$rows_count][$headerKey];
+            $secondRowCellToCompare = $value[$table_count][$rows_count][$headerKey];
 
-          // One-line multi-table validation.
-          if ($tables != 1) {
-            if ($firstRowCellToCompare == '' && $secondRowCellToCompare == '') {
-              $correct = TRUE;
-            }
-            elseif ($firstRowCellToCompare != '' && $secondRowCellToCompare != '') {
-              $correct = TRUE;
-            }
-            else {
-              $form_state->setErrorByName('Tables validation', $this->t(
-                'Invalid'));
+            // One-line multi-table validation.
+            if ($tables != 1) {
+              if ($firstRowCellToCompare == '' && $secondRowCellToCompare != ''
+              || $firstRowCellToCompare != '' && $secondRowCellToCompare == '') {
+                $form_state->setErrorByName('Tables validation', $this->t(
+                  'Invalid'));
+              }
             }
           }
         }
