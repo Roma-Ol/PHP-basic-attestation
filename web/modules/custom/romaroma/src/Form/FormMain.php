@@ -85,13 +85,13 @@ class FormMain extends FormBase {
           '#value'    => $year - $rows,
           '#disabled' => TRUE,
         ];
-        $form['table'][$tables][$rows]['jan']  = [
+        $form['table'][$tables][$rows]['1']    = [
           '#type' => 'number',
         ];
-        $form['table'][$tables][$rows]['feb']  = [
+        $form['table'][$tables][$rows]['2']    = [
           '#type' => 'number',
         ];
-        $form['table'][$tables][$rows]['mar']  = [
+        $form['table'][$tables][$rows]['3']    = [
           '#type' => 'number',
         ];
         $form['table'][$tables][$rows]['q1']   = [
@@ -99,13 +99,13 @@ class FormMain extends FormBase {
           '#value'    => '777',
           '#disabled' => TRUE,
         ];
-        $form['table'][$tables][$rows]['apr']  = [
+        $form['table'][$tables][$rows]['4']    = [
           '#type' => 'number',
         ];
-        $form['table'][$tables][$rows]['may']  = [
+        $form['table'][$tables][$rows]['5']    = [
           '#type' => 'number',
         ];
-        $form['table'][$tables][$rows]['jun']  = [
+        $form['table'][$tables][$rows]['6']    = [
           '#type' => 'number',
         ];
         $form['table'][$tables][$rows]['q2']   = [
@@ -113,13 +113,13 @@ class FormMain extends FormBase {
           '#value'    => '777',
           '#disabled' => TRUE,
         ];
-        $form['table'][$tables][$rows]['jul']  = [
+        $form['table'][$tables][$rows]['7']    = [
           '#type' => 'number',
         ];
-        $form['table'][$tables][$rows]['aug']  = [
+        $form['table'][$tables][$rows]['8']    = [
           '#type' => 'number',
         ];
-        $form['table'][$tables][$rows]['sep']  = [
+        $form['table'][$tables][$rows]['9']    = [
           '#type' => 'number',
         ];
         $form['table'][$tables][$rows]['q3']   = [
@@ -127,13 +127,13 @@ class FormMain extends FormBase {
           '#value'    => '777',
           '#disabled' => TRUE,
         ];
-        $form['table'][$tables][$rows]['oct']  = [
+        $form['table'][$tables][$rows]['10']   = [
           '#type' => 'number',
         ];
-        $form['table'][$tables][$rows]['nov']  = [
+        $form['table'][$tables][$rows]['11']   = [
           '#type' => 'number',
         ];
-        $form['table'][$tables][$rows]['dec']  = [
+        $form['table'][$tables][$rows]['12']   = [
           '#type' => 'number',
         ];
         $form['table'][$tables][$rows]['q4']   = [
@@ -183,14 +183,38 @@ class FormMain extends FormBase {
     // Do smt.
   }
 
+  /**
+   * Searching the 1st filled element of a row.
+   */
   function firstValueFilled($array) {
     foreach ($array as $firstNeedle) {
       if ($firstNeedle) {
-        $needleKey = array_search($firstNeedle, $array);
-        return $needleKey;
+        return array_search($firstNeedle, $array);
       }
     }
     return NULL;
+  }
+
+  /**
+   * Searching the last filled element of a row.
+   */
+  function lastValueFilled($array) {
+    $reversedArray = array_reverse($array);
+    foreach ($reversedArray as $lastNeedle) {
+      if ($lastNeedle) {
+        return array_search($lastNeedle, $reversedArray);
+      }
+    }
+    return NULL;
+  }
+
+  /**
+   * Filter the array according to the integrity.
+   * (Remove all the empty values from the new arr.
+   */
+  function filterTheArray($filtered) {
+    return $filtered !== '';
+
   }
 
   /**
@@ -203,18 +227,18 @@ class FormMain extends FormBase {
     $tables = $form_state->get('number_of_forms');
     $rows   = $form_state->get('number_of_rows');
     $keys   = [
-      'jan',
-      'feb',
-      'mar',
-      'apr',
-      'may',
-      'jun',
-      'jul',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
     ];
     // Repeating the validation 4 every table.
     $value = $form_state->getUserInput()['table'];
@@ -223,17 +247,26 @@ class FormMain extends FormBase {
       // Repeating the validation 4 every row.
       for ($rows_count = 0; $rows_count < $rows; $rows_count++) {
         // Validating the row integrity .
-        // Logic: take 1st, take last, check what`s between them.
-        $testValue = $value[$table_count][$rows_count];
-        $first     = $this->firstValueFilled($testValue);
+        // Logic: take 1st, take last, check what`s between them - get the length.
+        // Logic: Delete all the empty cells, compare length of 2 arr.
+        $arrayToFilter    = $value[$table_count][$rows_count];
+        $first            = $this->firstValueFilled($arrayToFilter);
+        $last             = $this->lastValueFilled($arrayToFilter) + 1;
+        $fullArrLength    = 12 - $last - $first + 2;
+        $preFilteredArray = array_slice($arrayToFilter, $first - 1, $fullArrLength);
+        $filteredArray    = array_filter($preFilteredArray, function ($filtered) {
+          return $filtered !== '';
+        });
+        if (count($preFilteredArray) !== count($filteredArray)) {
+          return $form_state->setErrorByName('Tables validation', $this->t(
+            'Invalid'));
+        }
 
         // Repeating the validation 4 every cell.
         for ($cell_count = 0; $cell_count < count($keys); $cell_count++) {
           $headerKey              = $keys[$cell_count];
           $firstRowCellToCompare  = $value[0][$rows_count][$headerKey];
           $secondRowCellToCompare = $value[$table_count][$rows_count][$headerKey];
-          $rowFirstCellFilled     = '';
-          $rowLastCellFilled      = '';
 
           // One-line multi-table validation.
           if ($tables != 1) {
