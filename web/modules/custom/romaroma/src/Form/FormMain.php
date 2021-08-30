@@ -201,63 +201,55 @@ class FormMain extends FormBase {
    * Basic form validation.
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // Ensuring that the triggering element is real submit button.
+    // Ensuring that the triggering element is real 'submit' button.
     $triggeredElement = $form_state->getTriggeringElement()['#name'];
     if ($triggeredElement === 'Send') {
-      // Getting the number of tables and rows.
+
+      // Getting the number of tables, rows and entered data.
       $tables = $form_state->get('number_of_forms');
       $rows   = $form_state->get('number_of_rows');
-      $keys   = [
-        '1',
-        '2',
-        '3',
-        '4',
-        '5',
-        '6',
-        '7',
-        '8',
-        '9',
-        '10',
-        '11',
-        '12',
-      ];
-      // Repeating the validation 4 every table.
-      $value = $form_state->getUserInput()['table'];
-      for ($table_count = 0; $table_count < $tables; $table_count++) {
+      $keys   = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+      $value  = $form_state->getUserInput()['table'];
 
-        // Repeating the validation 4 every row.
+      // Repeating 4 every table.
+      for ($table_count = 0; $table_count < 1; $table_count++) {
+        // Repeating 4 every row.
         for ($rows_count = 0; $rows_count < $rows; $rows_count++) {
-          // Validating the row integrity .
-          // Logic: take 1st,take last,check what`s between them-get the length.
-          // Logic: Delete all the empty cells, compare length of 2 arr.
-          $arrayToFilter    = $value[$table_count][$rows_count];
-          $first            = $this->firstValueFilled($arrayToFilter);
-          $last             = $this->lastValueFilled($arrayToFilter) + 1;
-          $fullArrLength    = 12 - $last - $first + 2;
-          $preFilteredArray = array_slice($arrayToFilter, $first - 1, $fullArrLength);
-          $filteredArray    = array_filter($preFilteredArray, function ($filtered) {
-            return $filtered !== '';
-          });
-          if (count($preFilteredArray) !== count($filteredArray)) {
-            return $form_state->setErrorByName('Tables validation', $this->t(
-              'Invalid'));
+          // Validating the year`s integrity.
+          // Logic: We merge all the cells (in context of one table into 1 array
+          // 1st and last filled value - 1st array 2 compare.
+          // Delete all unfilled cells - 2nd array 2 compare.
+          // Check if the number of 1st arr elements === 2nd arr elements.
+          // If so- there`s no empty cells. Otherwise - error.
+          foreach ($value[$table_count][$rows_count] as $seperateValue) {
+            $enteredData[] = $seperateValue;
           }
-
-          // Repeating the validation 4 every cell.
+          // Getting the cells values.
           for ($cell_count = 0; $cell_count < count($keys); $cell_count++) {
-            $headerKey              = $keys[$cell_count];
-            $firstRowCellToCompare  = $value[0][$rows_count][$headerKey];
-            $secondRowCellToCompare = $value[$table_count][$rows_count][$headerKey];
-
-            // One-line multi-table validation.
-            if ($tables != 1) {
+            // Multi-table validation.
+            if ($tables > 1) {
+              $headerKey              = $keys[$cell_count];
+              $firstRowCellToCompare  = $value[0][$rows_count][$headerKey];
+              $secondRowCellToCompare = $value[$table_count + 1][$rows_count][$headerKey];
               if ($firstRowCellToCompare == '' && $secondRowCellToCompare != ''
-              || $firstRowCellToCompare != '' && $secondRowCellToCompare == '') {
-                $form_state->setErrorByName('Tables validation', $this->t(
+                || $firstRowCellToCompare != '' && $secondRowCellToCompare == '') {
+                return $form_state->setErrorByName('Tables validation', $this->t(
                   'Invalid'));
               }
             }
           }
+        }
+        $enteredDataFirstFilled  = $this->firstValueFilled($enteredData);
+        $enteredDataLastFilled   = $this->lastValueFilled($enteredData);
+        $enteredDataLength       = count($enteredData) - 1;
+        $enteredDataDataSegment  = $enteredDataLength - $enteredDataLastFilled
+          - $enteredDataFirstFilled + 1;
+        $enteredDataPreFiltered  = array_slice($enteredData,
+          $enteredDataFirstFilled, $enteredDataDataSegment);
+        $enteredDataDataFiltered = array_filter($enteredDataPreFiltered);
+        if (count($enteredDataPreFiltered) !== count($enteredDataDataFiltered)) {
+          return $form_state->setErrorByName('Tables validation', $this->t(
+            'Invalid'));
         }
       }
     }
