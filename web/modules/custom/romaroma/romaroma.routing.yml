@@ -1,0 +1,7 @@
+romaroma.form_main:
+  path: '/form-main'
+  defaults:
+    _title: 'Form main'
+    _form: 'Drupal\romaroma\Form\FormMain'
+  requirements:
+    _permission: 'access content'
