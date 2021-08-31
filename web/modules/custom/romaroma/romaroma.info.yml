@@ -4,3 +4,6 @@ description: This outsatnding module was developed to generate the page (/form-m
 package: Custom
 core: 8.x
 core_version_requirement: ^8 || ^9
+
+libraries:
+  - romaroma/romaroma-style

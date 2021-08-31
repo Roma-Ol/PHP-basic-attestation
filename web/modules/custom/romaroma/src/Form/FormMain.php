@@ -86,7 +86,6 @@ class FormMain extends FormBase {
         ];
         $form['table'][$tables][$rows]['q1']   = [
           '#type'     => 'number',
-          '#value'    => '777',
           '#disabled' => TRUE,
         ];
         $form['table'][$tables][$rows]['4']    = [
@@ -100,7 +99,6 @@ class FormMain extends FormBase {
         ];
         $form['table'][$tables][$rows]['q2']   = [
           '#type'     => 'number',
-          '#value'    => '777',
           '#disabled' => TRUE,
         ];
         $form['table'][$tables][$rows]['7']    = [
@@ -114,7 +112,6 @@ class FormMain extends FormBase {
         ];
         $form['table'][$tables][$rows]['q3']   = [
           '#type'     => 'number',
-          '#value'    => '777',
           '#disabled' => TRUE,
         ];
         $form['table'][$tables][$rows]['10']   = [
@@ -128,7 +125,6 @@ class FormMain extends FormBase {
         ];
         $form['table'][$tables][$rows]['q4']   = [
           '#type'     => 'number',
-          '#value'    => '777',
           '#disabled' => TRUE,
         ];
         $form['table'][$tables][$rows]['ytd']  = [
@@ -161,11 +157,17 @@ class FormMain extends FormBase {
       ],
     ];
     // 'Submit' button.
-    $form['actions']['submit'] = [
+    $form['actions']['submit']      = [
       '#name'  => 'Send',
       '#type'  => 'submit',
       '#value' => $this->t('Send'),
+      '#ajax'  => [
+        'callback' => '::addFormAjax',
+        'wrapper'  => 'veritas-id-wrapper',
+      ],
     ];
+    $form['#attached']['library'][] = 'romaroma/romaroma-style';
+
 
     return $form;
   }
@@ -296,7 +298,55 @@ class FormMain extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->messenger()->addStatus($this->t('The message has been sent.'));
-    $form_state->setRedirect('romaroma.form_main');
+
+    // Putting the quater values.
+    // Getting the number of tables, rows and entered data.
+    $tables     = $form_state->get('number_of_forms');
+    $rows       = $form_state->get('number_of_rows');
+    $value      = $form_state->getUserInput()['table'];
+    $quaterName = ['q1', 'q2', 'q3', 'q4'];
+
+    foreach ($value as $key => $tables) {
+      foreach ($tables as $years) {
+        $chunkedArray[$key][] = array_chunk($years, 3);
+      }
+    }
+
+    foreach ($chunkedArray as $key => $tables) {
+      foreach ($tables as $yearKey => $years) {
+        foreach ($years as $quarterKey => $quarter) {
+          array_sum($quarter) == 0 ?
+            $quarterSumArray[$key][$yearKey][$quarterKey] = array_sum($quarter) :
+            $quarterSumArray[$key][$yearKey][$quarterKey] = round((array_sum($quarter) + 1) / 3, 2);
+        }
+      }
+    }
+
+    foreach ($quarterSumArray as $key => $tables) {
+      foreach ($tables as $yearKey => $years) {
+        foreach ($years as $quarterKey => $quarter) {
+          $quarter != 0 ? $form['table'][$key][$yearKey][$quaterName[$quarterKey]]['#value'] = $quarter :
+            $form['table'][$key][$yearKey][$quaterName[$quarterKey]]['#value'] = "";
+        }
+      }
+    }
+
+    foreach ($quarterSumArray as $key => $tables) {
+      foreach ($tables as $yearKey => $years) {
+        array_sum($years) == 0 ?
+          $yearSumArray[$key][$yearKey] = array_sum($years) :
+          $yearSumArray[$key][$yearKey] = round((array_sum($years) + 1) / 4, 2);
+      }
+    }
+
+    foreach ($yearSumArray as $key => $tables) {
+      foreach ($tables as $yearKey => $years) {
+        $years != 0 ? $form['table'][$key][$yearKey]['ytd']['#value'] = $years :
+          $form['table'][$key][$yearKey]['ytd']['#value'] = "";
+      }
+    }
+
+    return $form;
   }
 
 }
