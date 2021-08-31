@@ -134,29 +134,26 @@ class FormMain extends FormBase {
       }
     }
 
-    // Buttons.
-    // 'Add a row' button.
-    $form['actions']['add_row'] = [
+    // 'Add a row' & 'Add a form' & 'submit' buttons.
+    $form['actions']['add_row']     = [
       '#type'       => 'submit',
       '#value'      => t('+ Row'),
       '#submit'     => ['::addOneRow'],
       '#attributes' => ['class' => ['btn-transparent']],
       '#ajax'       => [
-        'callback' => '::addRowAjax',
+        'callback' => '::addElementAjax',
         'wrapper'  => 'veritas-id-wrapper',
       ],
     ];
-    // 'Add a form' button.
-    $form['actions']['add_form'] = [
+    $form['actions']['add_form']    = [
       '#type'   => 'submit',
       '#value'  => t('+ Form'),
       '#submit' => ['::addOneForm'],
       '#ajax'   => [
-        'callback' => '::addFormAjax',
+        'callback' => '::addElementAjax',
         'wrapper'  => 'veritas-id-wrapper',
       ],
     ];
-    // 'Submit' button.
     $form['actions']['submit']      = [
       '#name'  => 'Send',
       '#type'  => 'submit',
@@ -168,12 +165,11 @@ class FormMain extends FormBase {
     ];
     $form['#attached']['library'][] = 'romaroma/romaroma-style';
 
-
     return $form;
   }
 
   /**
-   * Searching the 1st filled element of a row.
+   * Function 2 search the 1st filled element of a row.
    */
   function firstValueFilled($array) {
     foreach ($array as $firstNeedle) {
@@ -185,7 +181,7 @@ class FormMain extends FormBase {
   }
 
   /**
-   * Searching the last filled element of a row.
+   * Function 2 search the last filled element of a row.
    */
   function lastValueFilled($array) {
     $reversedArray = array_reverse($array);
@@ -217,12 +213,13 @@ class FormMain extends FormBase {
       for ($table_count = 0; $table_count < 1; $table_count++) {
         // Repeating 4 every row.
         for ($rows_count = 0; $rows_count < $rows; $rows_count++) {
-          // Validating the year`s integrity.
-          // Logic: We merge all the cells (in context of one table into 1 array
-          // 1st and last filled value - 1st array 2 compare.
-          // Delete all unfilled cells - 2nd array 2 compare.
+
+          // Validating the year`s and month`s integrity.
+          // Logic: We merge all the cells (in context of 1 table) into 1 array
+          // Segment from 1st to last filled value - 1st array 2 compare.
+          // Delete all unfilled cells from this segment - 2nd array 2 compare.
           // Check if the number of 1st arr elements === 2nd arr elements.
-          // If so- there`s no empty cells. Otherwise - error.
+          // If so- there`s no empty cells. Otherwise - error. Easy - peasy.
           foreach ($value[$table_count][$rows_count] as $seperateValue) {
             $enteredData[] = $seperateValue;
           }
@@ -258,17 +255,9 @@ class FormMain extends FormBase {
   }
 
   /**
-   * AJAX adding a row.
+   * AJAX adding a row - table.
    */
-  public function addRowAjax(array &$form, FormStateInterface $form_state) {
-    $form = $form_state->getCompleteForm();
-    return $form['table'];
-  }
-
-  /**
-   * AJAX adding a form.
-   */
-  public function addFormAjax(array &$form, FormStateInterface $form_state) {
+  public function addElementAjax(array &$form, FormStateInterface $form_state) {
     $form = $form_state->getCompleteForm();
     return $form['table'];
   }
@@ -288,8 +277,8 @@ class FormMain extends FormBase {
    */
   public function addOneForm(array &$form, FormStateInterface $form_state) {
     $number_of_forms = $form_state->get('number_of_forms');
-    $add_button2     = $number_of_forms + 1;
-    $form_state->set('number_of_forms', $add_button2);
+    $add_button      = $number_of_forms + 1;
+    $form_state->set('number_of_forms', $add_button);
     $form_state->setRebuild();
   }
 
@@ -300,49 +289,59 @@ class FormMain extends FormBase {
     $this->messenger()->addStatus($this->t('The message has been sent.'));
 
     // Putting the quater values.
-    // Getting the number of tables, rows and entered data.
-    $tables     = $form_state->get('number_of_forms');
-    $rows       = $form_state->get('number_of_rows');
-    $value      = $form_state->getUserInput()['table'];
-    $quaterName = ['q1', 'q2', 'q3', 'q4'];
+    // Logic: We split every row (year) into 4 separate parts (3 items each)- it
+    // will correspond every separate quater. Then we count the sum of every
+    // part- save this value into the variable. After we`ll get 4 sums we`ll
+    // need to find the sum of them and put it as the year value. Easy-peasy.
+    $value       = $form_state->getUserInput()['table'];
+    $quarterName = ['q1', 'q2', 'q3', 'q4'];
 
-    foreach ($value as $key => $tables) {
-      foreach ($tables as $years) {
-        $chunkedArray[$key][] = array_chunk($years, 3);
+    // Getting the separate arrays (each is 3 items length) from the row(year).
+    foreach ($value as $key => $table) {
+      foreach ($table as $row) {
+        $chunkedArray[$key][] = array_chunk($row, 3);
       }
     }
 
-    foreach ($chunkedArray as $key => $tables) {
-      foreach ($tables as $yearKey => $years) {
-        foreach ($years as $quarterKey => $quarter) {
-          array_sum($quarter) == 0 ?
-            $quarterSumArray[$key][$yearKey][$quarterKey] = array_sum($quarter) :
-            $quarterSumArray[$key][$yearKey][$quarterKey] = round((array_sum($quarter) + 1) / 3, 2);
+    // Checking whether entered chunks aren`t empty.
+    // Putting the sum of every chunked arr into it`s separate variable.
+    foreach ($chunkedArray as $key => $table) {
+      foreach ($table as $yearKey => $year) {
+        foreach ($year as $quarterKey => $quarter) {
+          if (array_sum($quarter) !== 0) {
+            $quarterTotal[$key][$yearKey][$quarterKey] = round((array_sum($quarter) + 1) / 3, 2);
+          }
         }
       }
     }
 
-    foreach ($quarterSumArray as $key => $tables) {
-      foreach ($tables as $yearKey => $years) {
-        foreach ($years as $quarterKey => $quarter) {
-          $quarter != 0 ? $form['table'][$key][$yearKey][$quaterName[$quarterKey]]['#value'] = $quarter :
-            $form['table'][$key][$yearKey][$quaterName[$quarterKey]]['#value'] = "";
+    // Filling the quaters cells with the data from quarter total var.
+    foreach ($quarterTotal as $key => $table) {
+      foreach ($table as $yearKey => $row) {
+        foreach ($row as $quarterKey => $quarter) {
+          if ($quarter !== '') {
+            $form['table'][$key][$yearKey][$quarterName[$quarterKey]]['#value'] = $quarter;
+          }
         }
       }
     }
 
-    foreach ($quarterSumArray as $key => $tables) {
-      foreach ($tables as $yearKey => $years) {
-        array_sum($years) == 0 ?
-          $yearSumArray[$key][$yearKey] = array_sum($years) :
-          $yearSumArray[$key][$yearKey] = round((array_sum($years) + 1) / 4, 2);
+    // Checking whether counted quarters values aren`t empty.
+    // Putting the sum of all the quarters into separate variable.
+    foreach ($quarterTotal as $key => $table) {
+      foreach ($table as $yearKey => $row) {
+        if (array_sum($row) !== 0) {
+          $yearTotal[$key][$yearKey] = round((array_sum($row) + 1) / 4, 2);
+        }
       }
     }
 
-    foreach ($yearSumArray as $key => $tables) {
-      foreach ($tables as $yearKey => $years) {
-        $years != 0 ? $form['table'][$key][$yearKey]['ytd']['#value'] = $years :
-          $form['table'][$key][$yearKey]['ytd']['#value'] = "";
+    // Filling the year cell with the data from year total var.
+    foreach ($yearTotal as $key => $table) {
+      foreach ($table as $yearKey => $row) {
+        if ($row !== 0) {
+          $form['table'][$key][$yearKey]['ytd']['#value'] = $row;
+        }
       }
     }
 

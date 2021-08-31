@@ -1,6 +1,8 @@
 name: romaroma
 type: module
-description: This outsatnding module was developed to generate the page (/form-main) with the table to fil. It provides the years, quaters and years.
+description: This outsatnding module was developed to generate the page (/form-main) with the table to fil. It provides
+  the unique table with years, quaters and years. Gives u a possibillity to count it automatically and save a looooooot
+  of time.
 package: Custom
 core: 8.x
 core_version_requirement: ^8 || ^9
