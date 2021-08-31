@@ -159,7 +159,7 @@ class FormMain extends FormBase {
       '#type'  => 'submit',
       '#value' => $this->t('Send'),
       '#ajax'  => [
-        'callback' => '::addFormAjax',
+        'callback' => '::addElementAjax',
         'wrapper'  => 'veritas-id-wrapper',
       ],
     ];
