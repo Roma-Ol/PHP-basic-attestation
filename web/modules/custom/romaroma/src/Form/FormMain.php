@@ -23,63 +23,60 @@ class FormMain extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Current year.
     $year = date('Y');
-    // Number of rows.
-    $number_of_tags = $form_state->get('number_of_tags');
-    $zz             = 0;
+    // Counters for forms and lines.
+    $number_of_forms = $form_state->get('number_of_forms');
+    $number_of_rows = $form_state->get('number_of_rows');
 
-    for ($i = 1; $i <= 4; $i++) {
-      $zz++;
-    }
+    for ($tables = 0; $tables < $number_of_forms; $tables++) {
+      $form['table'][$tables] = [
+        '#type'   => 'table',
+        '#header' => [
+          'Year',
+          'Jan',
+          'Feb',
+          'Mar',
+          'Q1',
+          'Apr',
+          'May',
+          'Jun',
+          'Q2',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Q3',
+          'Oct',
+          'Nov',
+          'Dec',
+          'Q4',
+          'YTD',
+        ],
+      ];
 
-    $form['table'] = [
-      '#type'   => 'table',
-      '#header' => [
-        'Year',
-        'Jan',
-        'Feb',
-        'Mar',
-        'Q1',
-        'Apr',
-        'May',
-        'Jun',
-        'Q2',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Q3',
-        'Oct',
-        'Nov',
-        'Dec',
-        'Q4',
-        'YTD',
-      ],
-    ];
-
-    for ($i = 1; $i <= $number_of_tags - 1; $i++) {
-      $form['table'][$i]['year'] = [
-        '#type'  => 'number',
-        '#value' => $year - $i,
-      ];
-      $form['table'][$i]['jan']  = [
-        '#type' => 'number',
-      ];
-      $form['table'][$i]['feb']  = [
-        '#type' => 'number',
-      ];
+      for ($rows = 0; $rows < $number_of_rows; $rows++) {
+        $form['table'][$tables][$rows]['year'] = [
+          '#type'     => 'number',
+          '#value'    => $year - $rows,
+          '#disabled' => TRUE,
+        ];
+        for ($cells = 1; $cells <= 17; $cells++) {
+          $form['table'][$tables][$rows][$cells] = [
+            '#type' => 'number',
+          ];
+        }
+      }
     }
 
     // Add a row button.
     $form['addRow'] = [
       '#type'   => 'submit',
       '#value'  => t('+ Row'),
-      '#submit' => ['::addOneTag'],
+      '#submit' => ['::addOneRow'],
     ];
     // Add form button.
     $form['addForm'] = [
-      '#type'       => 'submit',
-      '#value'      => t('+ Form'),
-      '#submit'     => ['::addOneTag'],
-      '#attributes' => ["onclick" => "javascript: this.disabled = true;"],
+      '#type'   => 'submit',
+      '#value'  => t('+ Form'),
+      '#submit' => ['::addOneForm'],
     ];
     // Add a submit button that handles the submission of the form.
     $form['actions']['submit'] = [
@@ -88,9 +85,14 @@ class FormMain extends FormBase {
       '#attributes' => ["onclick" => "javascript: this.disabled = true;"],
     ];
 
-    if (empty($number_of_tags)) {
-      $number_of_tags = 1;
-      $form_state->set('number_of_tags', $number_of_tags);
+    if (empty($number_of_rows)) {
+      $number_of_rows = 1;
+      $form_state->set('number_of_rows', $number_of_rows);
+    }
+
+    if (empty($number_of_forms)) {
+      $number_of_forms = 1;
+      $form_state->set('$number_of_forms', $number_of_forms);
     }
 
     return $form;
@@ -106,9 +108,18 @@ class FormMain extends FormBase {
   /**
    * Increment number of rows.
    */
-  public function addOneTag(array &$form, FormStateInterface $form_state) {
-    $number_of_tags = $form_state->get('number_of_tags');
-    $form_state->set('number_of_tags', $number_of_tags + 1);
+  public function addOneRow(array &$form, FormStateInterface $form_state) {
+    $number_of_rows = $form_state->get('number_of_rows');
+    $form_state->set('number_of_rows', $number_of_rows + 1);
+    $form_state->setRebuild(TRUE);
+  }
+
+  /**
+   * Increment number of tables.
+   */
+  public function addOneForm(array &$form, FormStateInterface $form_state) {
+    $number_of_forms = $form_state->get('number_of_forms');
+    $form_state->set('number_of_forms', $number_of_forms + 1);
     $form_state->setRebuild(TRUE);
   }
 
