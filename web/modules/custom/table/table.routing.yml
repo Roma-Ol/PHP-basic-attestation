@@ -1,7 +1,0 @@
-table.example:
-  path: '/table/example'
-  defaults:
-    _title: 'Example'
-    _controller: '\Drupal\table\Controller\TableController::build'
-  requirements:
-    _permission: 'access content'
