@@ -11,6 +11,8 @@ use Drupal\Core\Form\FormStateInterface;
 class FormMain extends FormBase {
 
   /**
+   * Getting the form ID.
+   *
    * {@inheritdoc}
    */
   public function getFormId() {
@@ -18,6 +20,8 @@ class FormMain extends FormBase {
   }
 
   /**
+   * Building the form rows.
+   *
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
@@ -171,7 +175,7 @@ class FormMain extends FormBase {
   /**
    * Function 2 search the 1st filled element of a row.
    */
-  function firstValueFilled($array) {
+  public function firstValueFilled($array) {
     foreach ($array as $firstNeedle) {
       if ($firstNeedle) {
         return array_search($firstNeedle, $array);
@@ -183,7 +187,7 @@ class FormMain extends FormBase {
   /**
    * Function 2 search the last filled element of a row.
    */
-  function lastValueFilled($array) {
+  public function lastValueFilled($array) {
     $reversedArray = array_reverse($array);
     foreach ($reversedArray as $lastNeedle) {
       if ($lastNeedle) {
@@ -194,9 +198,9 @@ class FormMain extends FormBase {
   }
 
   /**
-   * {@inheritdoc}
-   *
    * Basic form validation.
+   *
+   * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     // Ensuring that the triggering element is real 'submit' button.
@@ -284,6 +288,8 @@ class FormMain extends FormBase {
 
   /**
    * Submit event.
+   *
+   * {@inheritDoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->messenger()->addStatus($this->t('The message has been sent.'));
@@ -297,6 +303,9 @@ class FormMain extends FormBase {
     $quarterName = ['q1', 'q2', 'q3', 'q4'];
 
     // Getting the separate arrays (each is 3 items length) from the row(year).
+    $chunkedArray = [];
+    $quarterTotal = [];
+    $yearTotal    = [];
     foreach ($value as $key => $table) {
       foreach ($table as $row) {
         $chunkedArray[$key][] = array_chunk($row, 3);
