@@ -72,6 +72,7 @@ class FormMain extends FormBase {
           'YTD',
         ],
       ];
+      // Super- dummy rows generator.
       for ($rows = 0; $rows < $number_of_rows; $rows++) {
         $form['table'][$tables][$rows]['year'] = [
           '#type'     => 'number',
@@ -243,9 +244,9 @@ class FormMain extends FormBase {
         }
         $enteredDataFirstFilled  = $this->firstValueFilled($enteredData);
         $enteredDataLastFilled   = $this->lastValueFilled($enteredData);
-        $enteredDataLength       = count($enteredData) - 1;
+        $enteredDataLength       = count($enteredData);
         $enteredDataDataSegment  = $enteredDataLength - $enteredDataLastFilled
-          - $enteredDataFirstFilled + 1;
+          - $enteredDataFirstFilled;
         $enteredDataPreFiltered  = array_slice($enteredData,
           $enteredDataFirstFilled, $enteredDataDataSegment);
         $enteredDataDataFiltered = array_filter($enteredDataPreFiltered);
