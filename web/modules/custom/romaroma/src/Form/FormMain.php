@@ -324,7 +324,7 @@ class FormMain extends FormBase {
       }
     }
 
-    // Filling the quaters cells with the data from quarter total var.
+    // Filling the quarters cells with the data from quarter total var.
     foreach ($quarterTotal as $key => $table) {
       foreach ($table as $yearKey => $row) {
         foreach ($row as $quarterKey => $quarter) {
