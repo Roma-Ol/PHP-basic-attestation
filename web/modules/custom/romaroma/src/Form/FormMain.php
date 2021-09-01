@@ -72,7 +72,6 @@ class FormMain extends FormBase {
           'YTD',
         ],
       ];
-      // Super- dummy rows generator.
       for ($rows = 0; $rows < $number_of_rows; $rows++) {
         $form['table'][$tables][$rows]['year'] = [
           '#type'     => 'number',
